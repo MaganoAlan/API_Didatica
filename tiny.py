@@ -1,4 +1,4 @@
-from tinydb import TinyDB, Query
+from tinydb import TinyDB, Query, where
 
 db = TinyDB('usuarios.json')
 # db.truncate() -> para apagar o db []
@@ -14,3 +14,5 @@ User = Query()
 # db.remove(User.id == 2)
 #  print(db.all())
 
+# res = db.search(User.email == 'string')
+# print(res[0])

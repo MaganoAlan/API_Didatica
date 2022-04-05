@@ -10,14 +10,10 @@ pip install httpie -> serve para testar requisições via terminal
 tinyDB para persistir os dados (implementar)
 https://tinydb.readthedocs.io/en/latest/getting-started.html
 """
-import locale
-import json
-import time
-
 from fastapi import FastAPI  # parece ser o mais moderno tem que ver o flask
 from fastapi.middleware.cors import CORSMiddleware  # serve para permitir o acesso do front
 from pydantic import BaseModel  # para instanciar objetos
-from tiny import db, User
+from tiny import db, User, where
 
 app = FastAPI()
 
@@ -75,7 +71,7 @@ def insere_usuario(usuario: Usuario):
         return {"Status": 400, "Mensagem": "Usuário ja existe!"}
     print(f'{usuario} adicionado com sucesso!')
     db.insert(dict(usuario))
-    return usuario
+    return {"Status": 200, "Mensagem": "Usuário adicionado"}
 
 
 @app.delete("/usuarios/{id_usuario}")
@@ -92,8 +88,14 @@ def deleta_usuario(id_usuario: int):
 def altera_dados(id_usuario: int, email: str, senha: str):
     for user in db:
         if user['id'] == id_usuario:
-            db.update({"email": email}, User.id == user['id'])
-            db.update({"senha": senha}, User.id == user['id'])
+            db.update({"email": email}, User.id == user['id'])  # User.id == Query().id == novo_id
+            db.update({"senha": senha}, User.id == user['id'])  # primeiro dado é o que vai ser alterado o segundo onde
             return {"Status": 200, "Mensagem": "Dados atualizados"}
     return {"Status": 400, "Mensagem": "Usuário não localizado!"}
 
+
+@app.get("/usuarios/{email}")
+def pesquisa_por_email(email: str):
+    res = db.search(User['email'] == email)
+    print(res)
+    return {"Status": 200, "Mensagem": "Dados atualizados"}
